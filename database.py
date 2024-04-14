@@ -20,7 +20,8 @@ class Database(Connection_Closure):
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS User(
                         id INTEGER PRIMARY KEY,
                         message_text TEXT,
-                        tts_symbols INTEGER)""")
+                        tts_symbols INTEGER,
+                        stt_blocks INTEGER)""")
         self.connect.commit()
 
     async def check_user_exists(self, id):
@@ -32,8 +33,8 @@ class Database(Connection_Closure):
         return data is not None
 
     async def add_user(self, id):
-        self.cursor.execute("INSERT INTO User VALUES(?, ?, ?);",
-                            (id, '', 300))
+        self.cursor.execute("INSERT INTO User VALUES(?, ?, ?, ?);",
+                            (id, '', 1, 1))
         self.connect.commit()
 
 
@@ -48,6 +49,35 @@ class tokens_user(Connection_Closure):
             return
         else:
             return row[0]
+
+
+class tokens_user_stt(Connection_Closure):
+    def __init__(self):
+        super().__init__()
+
+    async def stt_symbols_user(self, id):
+        self.cursor.execute(f"SELECT stt_blocks FROM User WHERE id = ?", (id,))
+        row = self.cursor.fetchone()
+        if not row[0]:
+            return
+        else:
+            return row[0]
+
+
+class tokens_add_stt(Connection_Closure):
+    def __init__(self):
+        super().__init__()
+
+    async def stt_symbols(self, id):
+        self.cursor.execute("SELECT id, stt_blocks FROM User WHERE id = ?", (id,))
+        result = self.cursor.fetchone()
+        if result is None:
+            return 'Ошибка, при запросе к БД.'
+        return result
+
+    async def add_stt_symbols(self, tokens, user_id):
+        self.cursor.execute("UPDATE User SET stt_blocks = ? WHERE id = ?", (tokens, user_id))
+        self.connect.commit()
 
 
 class tokens_add(Connection_Closure):

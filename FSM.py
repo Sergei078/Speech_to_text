@@ -2,4 +2,4 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class FSMFillForm(StatesGroup):
-    fill_text = State()  # Ожидание ввода текста от пользователя
+    voice_message = State()  # Ожидание голосового от пользователя
